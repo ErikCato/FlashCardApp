@@ -153,23 +153,24 @@ async function loadCards() {
 function toggleSettings() {
   const sc = document.getElementById("settingsCard");
   if (!sc) return;
-  sc.style.display = (sc.style.display === "none") ? "block" : "none";
+  sc.classList.toggle("hidden");
 }
 
 function init() {
   // Buttons
   el("saveCfgBtn").onclick = async () => {
-  try {
-    saveCfg();
-    await loadDecksAndSheets();
-    el("question").textContent = "Konfig sparad. Välj ämne och Ladda.";
+    try {
+      saveCfg();
+      await loadDecksAndSheets();
+      el("question").textContent = "Konfig sparad. Välj ämne och Ladda.";
 
-    const sc = document.getElementById("settingsCard");
-    if (sc) sc.style.display = "none";
-  } catch (e) {
-    el("question").textContent = `Fel: ${e.message || e}`;
-  }
-};
+      const sc = document.getElementById("settingsCard");
+      if (sc) sc.classList.add("hidden");
+
+    } catch (e) {
+      el("question").textContent = `Fel: ${e.message || e}`;
+    }
+  };
 
   el("reloadBtn").onclick = async () => {
     try { await loadCards(); } catch (e) { el("question").textContent = `Fel: ${e.message}`; }
