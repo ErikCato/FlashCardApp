@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Flashcards</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111111" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #0b0c10; color: #eaeaea; }
+    header { padding: 12px 16px; border-bottom: 1px solid #222; display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+    select, button, input { font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 1px solid #333; background: #121318; color: #eaeaea; }
+    button { cursor: pointer; }
+    main { padding: 16px; max-width: 720px; margin: 0 auto; }
+    .card { background: #111217; border: 1px solid #222; border-radius: 16px; padding: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+    .label { font-size: 12px; opacity: .7; text-transform: uppercase; letter-spacing: .08em; }
+    .q { font-size: 22px; line-height: 1.25; margin: 10px 0 0; }
+    .a { font-size: 18px; line-height: 1.35; margin: 10px 0 0; white-space: pre-wrap; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .spacer { flex: 1; }
+    .meta { margin-top: 10px; font-size: 13px; opacity: .75; }
+    .pill { display:inline-block; padding: 4px 8px; border-radius: 999px; background:#171922; border:1px solid #23263a; margin-right:6px; }
+    .danger { border-color:#5a1a1a; background:#1a0f0f; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Flashcards</strong>
+    <select id="deckSelect"></select>
+    <select id="sheetSelect"></select>
+    <button id="reloadBtn">Ladda</button>
+    <span class="spacer"></span>
+    <button id="shuffleBtn">Shuffle</button>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="label">Fråga</div>
+      <div id="question" class="q">Välj ämne och tryck Ladda</div>
+
+      <div class="row">
+        <button id="showBtn">Visa svar</button>
+        <button id="prevBtn">◀︎</button>
+        <button id="nextBtn">▶︎</button>
+      </div>
+
+      <div id="answerWrap" style="display:none; margin-top:14px;">
+        <div class="label">Svar</div>
+        <div id="answer" class="a"></div>
+
+        <div class="row">
+          <button class="gradeBtn" data-grade="easy">Kan</button>
+          <button class="gradeBtn" data-grade="maybe">Osäker</button>
+          <button class="gradeBtn" data-grade="hard">Svårt</button>
+        </div>
+      </div>
+
+      <div class="meta">
+        <span id="pos"></span>
+        <span id="tags"></span>
+      </div>
+    </div>
+
+    <div class="card danger" style="margin-top:14px;">
+      <div class="label">Inställning</div>
+      <div style="margin-top:8px;">
+        <div style="opacity:.8; font-size:14px;">API URL + nyckel (sparas lokalt i mobilen)</div>
+        <input id="apiUrl" style="width:100%; margin-top:8px;" placeholder="https://script.google.com/macros/s/.../exec" />
+        <input id="apiKey" style="width:100%; margin-top:8px;" placeholder="READONLY_KEY" />
+        <button id="saveCfgBtn" style="margin-top:10px;">Spara</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
