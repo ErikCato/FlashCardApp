@@ -72,6 +72,22 @@
     </div>
   </main>
 
-  <script src="app.js"></script>
+  <script>
+  // Visar JS-fel direkt på iPhone
+  window.addEventListener('error', (e) => {
+    alert('JS error: ' + (e.message || e.type));
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    alert('Promise error: ' + (e.reason?.message || e.reason));
+  });
+
+  // Bevis på att inline-JS körs
+  document.addEventListener('DOMContentLoaded', () => {
+    const q = document.getElementById('question');
+    if (q) q.textContent = 'Inline-JS körs ✅ (laddar app.js/apps.js…)';
+  });
+  </script>  
+
+  <script src="apps.js?v=3"></script>
 </body>
 </html>
