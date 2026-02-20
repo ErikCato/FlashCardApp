@@ -159,16 +159,17 @@ function toggleSettings() {
 function init() {
   // Buttons
   el("saveCfgBtn").onclick = async () => {
+  try {
     saveCfg();
-    try {
-      await loadDecksAndSheets();
-      el("question").textContent = "Konfig sparad. Välj ämne och Ladda.";
-    } catch (e) {
-      el("question").textContent = `Fel: ${e.message}`;
-    }
+    await loadDecksAndSheets();
+    el("question").textContent = "Konfig sparad. Välj ämne och Ladda.";
+
     const sc = document.getElementById("settingsCard");
     if (sc) sc.style.display = "none";
-  };
+  } catch (e) {
+    el("question").textContent = `Fel: ${e.message || e}`;
+  }
+};
 
   el("reloadBtn").onclick = async () => {
     try { await loadCards(); } catch (e) { el("question").textContent = `Fel: ${e.message}`; }
@@ -198,11 +199,7 @@ function init() {
   loadDecksAndSheets().catch(() => {
     el("question").textContent = "Fyll i API URL + nyckel och tryck Spara.";
   });
-
-
 }
-
-
 
 try {
   init();
