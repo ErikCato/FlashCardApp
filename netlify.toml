@@ -1,29 +1,6 @@
 [build]
   publish = "."
 
-# SPA fallback (så routing funkar om du bygger ut appen senare)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
-
-[[redirects]]
-  from = "/*.js"
-  to = "/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*.json"
-  to = "/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*.png"
-  to = "/:splat"
-  status = 200
-
-# Cache-strategi
 [[headers]]
   for = "/index.html"
   [headers.values]
@@ -38,19 +15,3 @@
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
-
-# Statiska assets kan cachas länge
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*.png"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
