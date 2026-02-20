@@ -29,8 +29,7 @@
 <body>
   <header>
     <strong>Flashcards</strong>
-    <select id="deckSelect"></select>
-    <select id="sheetSelect"></select>
+    <!-- deck/sheet selectors moved to selector card for focused selection view -->
     <button id="reloadBtn">Ladda</button>
     <span class="spacer"></span>
     <button id="shuffleBtn">Shuffle</button>
@@ -38,7 +37,8 @@
   </header>
 
   <main>
-    <div class="card">
+    <!-- FLASHCARDS SECTION -->
+    <section id="flashcardsSection" class="card">
       <div class="label">Fråga</div>
       <div id="question" class="q">Välj ämne och tryck Ladda</div>
 
@@ -49,6 +49,7 @@
       </div>
 
       <div id="answerWrap" style="display:none; margin-top:14px;">
+      <div id="answerWrap" class="hidden" style="margin-top:14px;">
         <div class="label">Svar</div>
         <div id="answer" class="a"></div>
 
@@ -65,6 +66,45 @@
       </div>
     </div>
 
+    <div id="selectorCard" class="card hidden" style="margin-top:14px;">
+      <div class="label">Välj</div>
+      <div style="margin-top:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div style="min-width:120px;">
+          <div class="label">Ämne</div>
+          <select id="deckSelect" style="width:220px; margin-top:6px;"></select>
+        </div>
+        <div style="min-width:120px;">
+          <div class="label">Område</div>
+          <select id="sheetSelect" style="width:220px; margin-top:6px;"></select>
+        </div>
+        <div>
+          <button id="loadOnlyBtn">Ladda</button>
+        </div>
+      </div>
+    </div>
+    </section>
+
+    <!-- SELECTION SECTION -->
+    <section id="selectionSection">
+    <div id="selectorCard" class="card" style="margin-top:14px;">
+      <div class="label">Välj</div>
+      <div style="margin-top:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div style="min-width:120px;">
+          <div class="label">Ämne</div>
+          <select id="deckSelect" style="width:220px; margin-top:6px;"></select>
+        </div>
+        <div style="min-width:120px;">
+          <div class="label">Område</div>
+          <select id="sheetSelect" style="width:220px; margin-top:6px;"></select>
+        </div>
+        <div>
+          <button id="loadOnlyBtn">Start</button>
+        </div>
+      </div>
+    </div>
+
+    </section>
+
     <div id="settingsCard" class="card danger hidden" style="margin-top:14px;">
       <div class="label">Inställning</div>
       <div style="margin-top:8px;">
@@ -75,6 +115,21 @@
       </div>
     </div>
   </main>
+
+  <!-- CONFIG MODAL (forced at startup if no config) -->
+  <div id="configModal" class="hidden" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:9999;">
+    <div class="card" style="width:90%; max-width:480px;">
+      <div class="label">Konfiguration</div>
+      <div style="margin-top:8px;">
+        <div style="opacity:.8; font-size:14px;">Fyll i API URL och nyckel</div>
+        <input id="modalApiUrl" style="width:100%; margin-top:8px;" placeholder="https://script.google.com/macros/s/.../exec" />
+        <input id="modalApiKey" style="width:100%; margin-top:8px;" placeholder="READONLY_KEY" />
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+          <button id="modalSaveBtn">Spara</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
   // Visar JS-fel direkt på iPhone

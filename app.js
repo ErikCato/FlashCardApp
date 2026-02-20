@@ -10,20 +10,49 @@ let decks = [];
 let cards = [];
 let order = [];
 let idx = 0;
+// App states
+const STATE_CONFIG = "CONFIG";
+const STATE_SELECTION = "SELECTION";
+const STATE_FLASHCARDS = "FLASHCARDS";
+let currentState = STATE_CONFIG;
+
+function render() {
+  const modal = el('configModal');
+  const selection = el('selectionSection');
+  const flash = el('flashcardsSection');
+  if (modal) modal.classList.toggle('hidden', currentState !== STATE_CONFIG);
+  if (selection) selection.classList.toggle('hidden', currentState !== STATE_SELECTION);
+  if (flash) flash.classList.toggle('hidden', currentState !== STATE_FLASHCARDS);
+  // header visibility: show header for selection and flashcards, hide for config
+  const hdr = document.querySelector('header');
+  if (hdr) hdr.classList.toggle('hidden', currentState === STATE_CONFIG);
+}
 
 function loadCfg() {
   const cfg = JSON.parse(localStorage.getItem(LS_CFG) || "{}");
-  el("apiUrl").value = cfg.apiUrl || "";
-  el("apiKey").value = cfg.apiKey || "";
+  const apiUrl = cfg.apiUrl || "";
+  const apiKey = cfg.apiKey || "";
+  if (el("apiUrl")) el("apiUrl").value = apiUrl;
+  if (el("apiKey")) el("apiKey").value = apiKey;
+  if (el("modalApiUrl")) el("modalApiUrl").value = apiUrl;
+  if (el("modalApiKey")) el("modalApiKey").value = apiKey;
   return cfg;
 }
 
 function saveCfg() {
+  // Prefer modal inputs if present (modal is primary config entry)
+  const urlEl = el('modalApiUrl') || el('apiUrl');
+  const keyEl = el('modalApiKey') || el('apiKey');
   const cfg = {
-    apiUrl: el("apiUrl").value.trim(),
-    apiKey: el("apiKey").value.trim(),
+    apiUrl: (urlEl && urlEl.value) ? urlEl.value.trim() : "",
+    apiKey: (keyEl && keyEl.value) ? keyEl.value.trim() : "",
   };
   localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+  // Mirror into both forms
+  if (el('apiUrl')) el('apiUrl').value = cfg.apiUrl;
+  if (el('apiKey')) el('apiKey').value = cfg.apiKey;
+  if (el('modalApiUrl')) el('modalApiUrl').value = cfg.apiUrl;
+  if (el('modalApiKey')) el('modalApiKey').value = cfg.apiKey;
   return cfg;
 }
 
@@ -52,14 +81,16 @@ function setStatusTags(card) {
 function showCard() {
   if (!cards.length) {
     el("question").textContent = "Inga kort hittades.";
-    el("answerWrap").style.display = "none";
+    el("answerWrap").classList.add('hidden');
     setStatusTags(null);
     return;
   }
   const card = cards[order[idx]];
   el("question").textContent = card.question;
   el("answer").textContent = card.answer;
-  el("answerWrap").style.display = "none";
+  el("answerWrap").classList.add('hidden');
+  // Ensure show button label resets
+  const sb = el("showBtn"); if (sb) sb.textContent = "Visa svar";
   setStatusTags(card);
 }
 
@@ -120,22 +151,37 @@ function gradeCurrent(grade) {
 // --- UI wiring ---
 async function loadDecksAndSheets() {
   const cfg = loadCfg();
+  if (!cfg.apiUrl || !cfg.apiKey) throw new Error('Sätt API URL och nyckel först.');
   const js = await apiGet(cfg, { path: "decks" });
   decks = js.decks || [];
 
   const deckSel = el("deckSelect");
-  deckSel.innerHTML = decks.map(d => `<option value="${escapeHtml(d.deckId)}">${escapeHtml(d.title)}</option>`).join("");
+  if (!deckSel) throw new Error('Element deckSelect saknas i DOM');
+  if (decks.length === 0) {
+    deckSel.innerHTML = `<option value="">Inga ämnen</option>`;
+  } else {
+    deckSel.innerHTML = decks.map(d => `<option value="${escapeHtml(d.deckId)}">${escapeHtml(d.title)}</option>`).join("");
+    // select first deck by default
+    deckSel.selectedIndex = 0;
+  }
 
   deckSel.onchange = () => populateSheets();
   populateSheets();
 }
 
 function populateSheets() {
-  const deckId = el("deckSelect").value;
-  const deck = decks.find(d => d.deckId === deckId);
   const sheetSel = el("sheetSelect");
+  const deckSel = el("deckSelect");
+  if (!sheetSel || !deckSel) return;
+  const deckId = deckSel.value || "";
+  const deck = decks.find(d => d.deckId === deckId);
   const sheets = (deck && deck.sheets) ? deck.sheets : [];
-  sheetSel.innerHTML = sheets.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+  if (sheets.length === 0) {
+    sheetSel.innerHTML = `<option value="">Inga områden</option>`;
+  } else {
+    sheetSel.innerHTML = sheets.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+    sheetSel.selectedIndex = 0;
+  }
 }
 
 async function loadCards() {
@@ -156,6 +202,37 @@ function toggleSettings() {
   sc.classList.toggle("hidden");
 }
 
+function setUIForSettings(onlySettings) {
+  const hdr = document.querySelector('header');
+  const mainCards = Array.from(document.querySelectorAll('main > .card'));
+  const settingsCard = document.getElementById('settingsCard');
+  if (onlySettings) {
+    if (hdr) hdr.classList.add('hidden');
+    mainCards.forEach(c => { if (c !== settingsCard) c.classList.add('hidden'); });
+    if (settingsCard) settingsCard.classList.remove('hidden');
+  } else {
+    if (hdr) hdr.classList.remove('hidden');
+    mainCards.forEach(c => { if (c !== settingsCard) c.classList.remove('hidden'); });
+    if (settingsCard) settingsCard.classList.add('hidden');
+  }
+}
+
+function setUIForSelector(onlySelector) {
+  const hdr = document.querySelector('header');
+  const mainCards = Array.from(document.querySelectorAll('main > .card'));
+  const selectorCard = document.getElementById('selectorCard');
+  mainCards.forEach(c => {
+    if (c === selectorCard) return;
+    if (onlySelector) c.classList.add('hidden'); else c.classList.remove('hidden');
+  });
+  if (selectorCard) {
+    if (onlySelector) selectorCard.classList.remove('hidden'); else selectorCard.classList.add('hidden');
+  }
+  if (hdr) {
+    if (onlySelector) hdr.classList.add('hidden'); else hdr.classList.remove('hidden');
+  }
+}
+
 function init() {
   // Buttons
   el("saveCfgBtn").onclick = async () => {
@@ -163,12 +240,11 @@ function init() {
       saveCfg();
       await loadDecksAndSheets();
       el("question").textContent = "Konfig sparad. Välj ämne och Ladda.";
+      // Show focused selector view (only deck/sheet + Ladda)
+      setUIForSelector(true);
     } catch (e) {
       el("question").textContent = `Fel: ${e.message || e}`;
     }
-    // Always hide settings card when Spara is clicked
-    const sc = document.getElementById("settingsCard");
-    if (sc) sc.classList.add("hidden");
   };
 
   el("reloadBtn").onclick = async () => {
@@ -177,8 +253,49 @@ function init() {
 
   el("showBtn").onclick = () => {
     if (!cards.length) return;
-    el("answerWrap").style.display = (el("answerWrap").style.display === "none") ? "block" : "none";
+    const aw = el('answerWrap');
+    const btn = el('showBtn');
+    if (aw.classList.contains('hidden')) {
+      aw.classList.remove('hidden');
+      if (btn) btn.textContent = 'Dölj svar';
+    } else {
+      aw.classList.add('hidden');
+      if (btn) btn.textContent = 'Visa svar';
+    }
   };
+
+  // Load-only button in selector view
+  const loadOnly = el("loadOnlyBtn");
+  if (loadOnly) {
+    loadOnly.onclick = async () => {
+      try {
+        await loadCards();
+        // Transition to flashcards on success
+        currentState = STATE_FLASHCARDS; render();
+      } catch (e) {
+        el("question").textContent = `Fel: ${e.message || e}`;
+      }
+    };
+  }
+
+  // Back to selection button (in flashcards view)
+  const backBtn = el('backToSelectionBtn');
+  if (backBtn) backBtn.onclick = () => { currentState = STATE_SELECTION; render(); };
+
+  // Modal save button
+  const modalSave = el('modalSaveBtn');
+  if (modalSave) {
+    modalSave.onclick = async () => {
+      try {
+        const cfg = saveCfg();
+        await loadDecksAndSheets();
+        currentState = STATE_SELECTION; render();
+      } catch (e) {
+        // show error in modal by using question area
+        el('question').textContent = `Fel: ${e.message || e}`;
+      }
+    };
+  }
 
   el("nextBtn").onclick = next;
   el("prevBtn").onclick = prev;
@@ -195,10 +312,20 @@ function init() {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 
-  // Try initial load
-  loadDecksAndSheets().catch(() => {
-    el("question").textContent = "Fyll i API URL + nyckel och tryck Spara.";
-  });
+  // Initial behaviour: show config modal if missing, otherwise selection
+  const cfg = loadCfg();
+  if (!cfg.apiUrl || !cfg.apiKey) {
+    el('question').textContent = 'Fyll i API URL + nyckel och tryck Spara.';
+    currentState = STATE_CONFIG; render();
+    const mUrl = el('modalApiUrl'); if (mUrl) mUrl.focus();
+  } else {
+    try {
+      await loadDecksAndSheets();
+    } catch (e) {
+      el('question').textContent = `Fel: ${e.message || e}`;
+    }
+    currentState = STATE_SELECTION; render();
+  }
 }
 
 try {
