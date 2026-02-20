@@ -1,4 +1,4 @@
-alert("apps.js laddad ✅");
+alert("app.js laddad ✅");
 
 // --- Local config ---
 const LS_CFG = "flashcards_cfg_v1";
@@ -190,4 +190,8 @@ function init() {
   });
 }
 
-init();
+try {
+  init();
+} catch (e) {
+  alert("Init-krasch: " + (e.message || e));
+}
