@@ -1,3 +1,5 @@
+alert("apps.js laddad ✅");
+
 // --- Local config ---
 const LS_CFG = "flashcards_cfg_v1";
 const LS_PROGRESS = "flashcards_progress_v1";
