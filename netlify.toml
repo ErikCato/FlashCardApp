@@ -6,6 +6,22 @@
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
+
+[[redirects]]
+  from = "/*.js"
+  to = "/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*.json"
+  to = "/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*.png"
+  to = "/:splat"
+  status = 200
 
 # Cache-strategi
 [[headers]]
