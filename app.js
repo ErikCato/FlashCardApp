@@ -163,13 +163,12 @@ function init() {
       saveCfg();
       await loadDecksAndSheets();
       el("question").textContent = "Konfig sparad. Välj ämne och Ladda.";
-
-      const sc = document.getElementById("settingsCard");
-      if (sc) sc.classList.add("hidden");
-
     } catch (e) {
       el("question").textContent = `Fel: ${e.message || e}`;
     }
+    // Always hide settings card when Spara is clicked
+    const sc = document.getElementById("settingsCard");
+    if (sc) sc.classList.add("hidden");
   };
 
   el("reloadBtn").onclick = async () => {
