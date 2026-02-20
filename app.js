@@ -150,6 +150,12 @@ async function loadCards() {
   showCard();
 }
 
+function toggleSettings() {
+  const sc = document.getElementById("settingsCard");
+  if (!sc) return;
+  sc.style.display = (sc.style.display === "none") ? "block" : "none";
+}
+
 function init() {
   // Buttons
   el("saveCfgBtn").onclick = async () => {
@@ -160,6 +166,8 @@ function init() {
     } catch (e) {
       el("question").textContent = `Fel: ${e.message}`;
     }
+    const sc = document.getElementById("settingsCard");
+    if (sc) sc.style.display = "none";
   };
 
   el("reloadBtn").onclick = async () => {
@@ -175,6 +183,8 @@ function init() {
   el("prevBtn").onclick = prev;
   el("shuffleBtn").onclick = () => (cards.length ? shuffleOrder() : null);
 
+  el("settingsToggleBtn").onclick = toggleSettings;
+
   document.querySelectorAll(".gradeBtn").forEach(btn => {
     btn.onclick = () => gradeCurrent(btn.dataset.grade);
   });
@@ -188,7 +198,11 @@ function init() {
   loadDecksAndSheets().catch(() => {
     el("question").textContent = "Fyll i API URL + nyckel och tryck Spara.";
   });
+
+
 }
+
+
 
 try {
   init();
